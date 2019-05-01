@@ -1,3 +1,5 @@
+Deneme1
+
 import os
 import random
 import pygame
