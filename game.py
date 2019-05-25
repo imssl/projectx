@@ -36,7 +36,7 @@ unlock = pygame.mixer.Sound("dr.wav")
 # Defining the arrays that will hold interactable and uninteractable elements in the game.
 walls = []                                                 
 papers = []
-computers = []
+comps = []
 doors = []
 papers = []
 
@@ -53,14 +53,14 @@ level = [
     "WWW  WWWPP  WWW   WWWWWXWW",
     "WW   WWW   WWWW   WC     W",
     "W    WWWW  WWWW   W      W",
-    "WWBWWWWWWWWWWWWWVWWWW    W",
+    "WW WWWWWWWWWWWWWVWWWW    W",
     "W        W          WW  WW",
-    "WWWWWWWWAWWWWWWWWWWLWW  WW",
+    "WWWWWWWWAWWWWWWWWWW WW  WW",
     "WWWWWPCW WWW WWWW   WW  WW",
     "WWW      W   WWWW   WW  WW",
     "WWW      W          WW  WW",
     "WWW      WWW        WW  WW",
-    "WWW      WWW        T    W",
+    "WWW      WWW             W",
     "WWW      WWW        W    W",
     "WWWWWWWWWWWWWWWWWWWWWWWWWW",
     ]
@@ -79,6 +79,11 @@ def newlevel(level):
         def __init__(self, pos):
             doors.append(self)
             self.rect = pygame.Rect(pos[0], pos[1], 40, 40)
+            
+    class Comp(object):
+        def __init__(self, pos):
+            comps.append(self)
+            self.rect = pygame.Rect(pos[0], pos[1], 40, 40)
         
     class Paper(object):
         
@@ -93,22 +98,28 @@ def newlevel(level):
                 Wall((x, y))
             elif col == 'A' or col == 'B' or col == 'Q' or col == 'V' or col == 'R' or col == 'L' or col == 'T' or col == 'X':
                 Door((x, y))
+            elif col == 'C':
+                Comp((x, y))
             elif col == 'P':
                 Paper((x,y))
             x += 40
         y += 40
         x = 0
         
-def PaperBox():
+def PaperBox(entry1,entry2):
     screen = pygame.display.set_mode([1039,719])
     font = pygame.font.Font(None, 36)
-    text = font.render("Game Over", True, white)
+    text = font.render(entry1, True, white)
     text_rect = text.get_rect()
     text_x = screen.get_width() / 2 - text_rect.width / 2
     text_y = screen.get_height() / 2 - text_rect.height / 2
     screen.blit(text, [text_x, text_y])
+    text = font.render(entry2, True, white)
+    text_rect = text.get_rect()
+    text_y += 30
+    screen.blit(text, [text_x, text_y])
     pygame.display.flip()
-    time.sleep(3)
+    time.sleep(7)
     
     
 #Defining the main loop.
@@ -140,7 +151,11 @@ def game_loop():
             # Moving the character on x and y axises.
             self.rect.x += dx
             self.rect.y += dy
-
+            print(self.rect.x, self.rect.y)
+            
+            if (self.rect.x > 78 and self.rect.x < 94 and self.rect.y < 350 and self.rect.y > 340) or (self.rect.x > 750 and self.rect.x < 780 and self.rect.y < 380 and self.rect.y > 370) or (self.rect.x > 760 and self.rect.x < 770 and self.rect.y < 610 and self.rect.y > 575):
+                pygame.mixer.Sound.play(unlock)
+                
             # If there is a collision with a wall, stop.
             for wall in walls:
                 if self.rect.colliderect(wall.rect):
@@ -152,6 +167,46 @@ def game_loop():
                         self.rect.bottom = wall.rect.top
                     if dy < 0: # Moving up; Hit the bottom side of the wall
                         self.rect.top = wall.rect.bottom
+            
+            for comp in comps:
+                if self.rect.colliderect(comp.rect):
+                    if dx > 0: # Moving right; Hit the left side of the paper
+                        self.rect.right = comp.rect.left
+                    if dx < 0: # Moving left; Hit the right side of the paper
+                        self.rect.left = comp.rect.right
+                    if dy > 0: # Moving down; Hit the top side of the paper
+                        self.rect.bottom = comp.rect.top
+                    if dy < 0: # Moving up; Hit the bottom side of the paper
+                        self.rect.top = comp.rect.bottom
+                    
+                    if key[pygame.K_SPACE]:
+                        if self.rect.x > 145 and self.rect.x < 180 and self.rect.y < 90 and self.rect.y > 60:
+                            PaperBox('Enter the commands one by one in order','sudo find grep hash')
+                            time.sleep(7)
+                            text1 = input()
+                            text2 = input()
+                            text3 = input()
+                            text4 = input()
+                            if text1 == 'sudo' and text2 == 'find' and text3 == 'grep' and text4 == 'hash':
+                                PaperBox('Password is 4531','')
+                        elif self.rect.x > 620 and self.rect.x < 680 and self.rect.y < 90 and self.rect.y > 70:
+                            PaperBox('Enter the commands one by one in order','sudo chgr cron kill')
+                            time.sleep(7)
+                            text1 = input()
+                            text2 = input()
+                            text3 = input()
+                            text4 = input()
+                            if text1 == 'sudo' and text2 == 'chgr' and text3 == 'cron' and text4 == 'kill':
+                                PaperBox('Password is 8743','')
+                        elif self.rect.x > 750 and self.rect.x < 790 and self.rect.y < 300 and self.rect.y > 270:
+                            PaperBox('Enter the commands one by one in order','sudo user sort free')
+                            time.sleep(7)
+                            text1 = input()
+                            text2 = input()
+                            text3 = input()
+                            text4 = input()
+                            if text1 == 'sudo' and text2 == 'user' and text3 == 'sort' and text4 == 'free':
+                                PaperBox('Password is 7560','')
                         
             for paper in papers:
                 if self.rect.colliderect(paper.rect):
@@ -165,8 +220,11 @@ def game_loop():
                         self.rect.top = paper.rect.bottom
                         
                     if key[pygame.K_SPACE]:
-                        PaperBox()
-                        
+                        if self.rect.x > 185 and self.rect.x < 480 and self.rect.y < 485 and self.rect.y > 470:
+                            PaperBox('Henry you lucky pig, I hope you are having fun with your vacation in Miami,', 'IT changed the door password while you are gone, it is 5682. - Johnson')
+                        elif self.rect.x < 380 and self.rect.x > 320:
+                            PaperBox('I cant believe I keep forgetting a four digit password,', '1689')
+
             # If there is a collision with a locked door, stop.            
             for door in doors:
                 if self.rect.colliderect(door.rect):
@@ -182,16 +240,32 @@ def game_loop():
                     # Using spacebar to interact with the doors when nearby
                     if key[pygame.K_SPACE]:
                         text = input()
-                        if text == '1234':                                     # Checking for the correct input for the first door
+                        if text == '5682' and self.rect.x > 310 and self.rect.x < 335:  # Checking for the correct input for the first door
                             pygame.mixer.Sound.play(acgr)                      # Playing the access granted sound
                             time.sleep(0.75)                                   # Letting the screen stay for 0.75 seconds
                             pygame.mixer.Sound.play(unlock)                    # Palying door unlock sound
                             self.rect = pygame.Rect(310, 360, 30, 30)          # Transporting the player to the other side of the door
-                        elif text == '4321':
+                        elif text == '4531' and self.rect.y < 95 and self.rect.y > 50 and self.rect.x > 150 and self.rect.x < 200:  # Checking for the correct input for the first door
                             pygame.mixer.Sound.play(acgr)                      # Playing the access granted sound
                             time.sleep(0.75)                                   # Letting the screen stay for 0.75 seconds
-                            pygame.mixer.Sound.play(unlock)                    # Palying door unlock sound# Checking for the correct input for the first door
-                            self.rect = pygame.Rect(88, 290, 30, 30)
+                            pygame.mixer.Sound.play(unlock)                    # Palying door unlock sound
+                            self.rect = pygame.Rect(250, 80, 30, 30)          # Transporting the player to the other side of the door
+                        elif text == '1689' and self.rect.y > 45 and self.rect.y < 100 and self.rect.x > 420 and self.rect.x < 480:  # Checking for the correct input for the first door
+                            pygame.mixer.Sound.play(acgr)                      # Playing the access granted sound
+                            time.sleep(0.75)                                   # Letting the screen stay for 0.75 seconds
+                            pygame.mixer.Sound.play(unlock)                    # Palying door unlock sound
+                            self.rect = pygame.Rect(520, 80, 30, 30)          # Transporting the player to the other side of the door
+                        elif text == '8743' and self.rect.y > 270 and self.rect.y < 300 and self.rect.x > 620 and self.rect.x < 670:  # Checking for the correct input for the first door
+                            pygame.mixer.Sound.play(acgr)                      # Playing the access granted sound
+                            time.sleep(0.75)                                   # Letting the screen stay for 0.75 seconds
+                            pygame.mixer.Sound.play(unlock)                    # Palying door unlock sound
+                            self.rect = pygame.Rect(650, 360, 30, 30)          # Transporting the player to the other side of the door
+                        elif text == '7560' and self.rect.y > 230 and self.rect.y < 260 and self.rect.x > 890 and self.rect.x < 970:  # Checking for the correct input for the first door
+                            pygame.mixer.Sound.play(acgr)                      # Playing the access granted sound
+                            time.sleep(0.75)                                   # Letting the screen stay for 0.75 seconds
+                            pygame.mixer.Sound.play(unlock)                    # Palying door unlock sound
+                            PaperBox('Congratulations agent, you have reached the server room','Thank you for playing our demo')
+                            quitgame()
                         else:
                             pygame.mixer.Sound.play(acdn)
                         
@@ -253,8 +327,6 @@ def game_loop():
             win.blit(walkDown[walkCount % 4], (player.rect.x, player.rect.y))
 
         pygame.display.flip()                                      # Updating/Refreshing the screen each time.
-        print(walkCount, walkCount//3)
-        
         
 # Defining the main menu activities.
 def game_intro():
@@ -355,6 +427,6 @@ def quitgame():
     pygame.QUIT
     quit()
 
-#game_intro()
+game_intro()
 game_loop()
 quit()
